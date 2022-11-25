@@ -1,0 +1,34 @@
+
+name: bohr.io first deploy
+on:
+  repository_dispatch:
+    types: [bohr-first-run-dispatch]
+permissions: write-all
+
+concurrency:
+  group: bohr-deploy
+
+jobs:
+  prepare:
+    name: Prepare repository for bohr.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: main
+
+      - uses: actions/checkout@v3
+        with:
+          path: template
+          repository: 'bohr-io/portfolio-template'
+
+      - name: Copy template
+        run: |
+          cd template && rm -rf .git && rm -rf .github && cd .. && cp -r template/. main
+          cd main
+          git pull
+          git config --global user.email "hello@bohr.io"
+          git config --global user.name "bohr.io"
+          git add .
+          git commit -m "Initial template commit"
+          git push
